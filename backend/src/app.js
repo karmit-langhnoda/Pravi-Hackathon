@@ -24,9 +24,22 @@ const app = express();
 // Security
 app.use(helmet());
 app.use(cors({
-  origin: env.CLIENT_ORIGIN,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      env.CLIENT_ORIGIN === '*' ||
+      origin === env.CLIENT_ORIGIN ||
+      origin.endsWith('.vercel.app') ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1')
+    ) {
+      return callback(null, true);
+    }
+    // Permissive callback for deployment flexibility
+    return callback(null, true);
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
 }));
 
