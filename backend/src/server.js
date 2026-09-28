@@ -13,8 +13,8 @@ const startServer = async () => {
   const shutdown = async (signal) => {
     logger.info(`${signal} received. Shutting down...`);
     server.close(async () => {
-      const mongoose = (await import('mongoose')).default;
-      await mongoose.connection.close();
+      const { closeDB } = await import('./lib/db.js');
+      await closeDB();
       logger.info('Server shut down');
       process.exit(0);
     });

@@ -19,6 +19,7 @@ const envSchema = z.object({
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),
   SEED_ADMIN_PASSWORD: z.string().default('Admin@123'),
   SEED_USER_PASSWORD: z.string().default('User@123'),
+  DATABASE_URL: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

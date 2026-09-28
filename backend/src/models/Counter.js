@@ -1,11 +1,3 @@
-import mongoose from 'mongoose';
+import { createPgModel } from '../lib/pgModel.js';
 
-const counterSchema = new mongoose.Schema({
-  _id: String, // e.g., "tag:LT:2026"
-  seq: {
-    type: Number,
-    default: 0,
-  },
-});
-
-export const Counter = mongoose.model('Counter', counterSchema);
+export const Counter = createPgModel('counters', 'Counter');

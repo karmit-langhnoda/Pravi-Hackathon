@@ -79,7 +79,7 @@ export const listAssets = async (query, user) => {
   const hasMore = assets.length > lim;
   const data = hasMore ? assets.slice(0, lim) : assets;
   const nextCursor = hasMore && data.length > 0
-    ? `${data[data.length - 1].createdAt.toISOString()}_${data[data.length - 1]._id}`
+    ? `${new Date(data[data.length - 1].createdAt).toISOString()}_${data[data.length - 1]._id}`
     : null;
 
   return { data, nextCursor, hasMore };
