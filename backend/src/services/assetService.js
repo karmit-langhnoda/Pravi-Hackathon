@@ -32,6 +32,8 @@ export const listAssets = async (query, user) => {
         { assetTag: { $regex: q, $options: 'i' } },
       ],
     });
+  }
+
   if (type) {
     conditions.push({
       $or: [
