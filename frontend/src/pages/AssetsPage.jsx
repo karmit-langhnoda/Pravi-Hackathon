@@ -1,16 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import { getExpiryInfo } from '../utils/expiry';
 
 export default function AssetsPage() {
+  const [searchParams] = useSearchParams();
+  const initialType = searchParams.get('type') || '';
+
   const [assets, setAssets] = useState([]);
   const [types, setTypes] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [poolFilter, setPoolFilter] = useState('all'); // 'all', 'free', 'project'
   const [deadlineFilter, setDeadlineFilter] = useState('all'); // 'all', 'expired', 'urgent', 'month'
-  const [filters, setFilters] = useState({ q: '', type: '', status: '', project: '' });
+  const [filters, setFilters] = useState({ q: '', type: initialType, status: '', project: '' });
+
+  useEffect(() => {
+    const t = searchParams.get('type');
+    if (t) setFilters((prev) => ({ ...prev, type: t }));
+  }, [searchParams]);
 
   useEffect(() => {
     api.get('/asset-types').then((r) => setTypes(r.data.data || [])).catch(() => {});

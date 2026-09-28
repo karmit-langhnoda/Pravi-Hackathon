@@ -32,9 +32,16 @@ export const listAssets = async (query, user) => {
         { assetTag: { $regex: q, $options: 'i' } },
       ],
     });
+  if (type) {
+    conditions.push({
+      $or: [
+        { assetType: type },
+        { 'assetType._id': type },
+        { 'assetType.id': type },
+        { 'assetType.code': type },
+      ],
+    });
   }
-  if (type) conditions.push({ assetType: type });
-  if (status) conditions.push({ status });
   if (location) conditions.push({ location });
   if (department) conditions.push({ department });
   if (assignee) conditions.push({ 'assignment.user': assignee });

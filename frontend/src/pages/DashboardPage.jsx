@@ -51,6 +51,7 @@ export default function DashboardPage() {
   ];
 
   const totalByStatus = byStatus.reduce((s, b) => s + b.count, 0) || 1;
+  const totalByType = byType.reduce((s, b) => s + (Number(b.count) || 0), 0) || 1;
   const deadlineItems = warranties?.items || [];
 
   return (
@@ -174,15 +175,47 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* By Type */}
         <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs">
-          <h2 className="text-base font-bold text-slate-900 mb-4">Assets by Type</h2>
-          <div className="space-y-3">
-            {byType.map((item, i) => (
-              <div key={item._id} className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                <span className="text-sm text-slate-700 font-medium flex-1">{item.name}</span>
-                <span className="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">{item.count}</span>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold text-slate-900">Assets by Equipment Type</h2>
+            <span className="text-xs font-semibold text-slate-400">{byType.length} Types</span>
+          </div>
+          <div className="space-y-3.5">
+            {byType.map((item, i) => {
+              const name = item.name || item.code || 'Equipment';
+              const percent = Math.round(((Number(item.count) || 0) / totalByType) * 100);
+              const color = COLORS[i % COLORS.length];
+              return (
+                <Link
+                  key={item._id}
+                  to={`/assets?type=${item._id}`}
+                  className="block group hover:bg-slate-50/70 p-2 rounded-xl transition -mx-2"
+                >
+                  <div className="flex items-center justify-between text-sm mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                      <span className="font-semibold text-slate-800 group-hover:text-orange-600 transition">{name}</span>
+                      {item.code && (
+                        <span className="text-2xs font-mono bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">
+                          {item.code}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400 font-medium">{percent}%</span>
+                      <span className="text-xs font-bold text-slate-900 bg-slate-100 group-hover:bg-orange-100 group-hover:text-orange-700 px-2 py-0.5 rounded-md border border-slate-200 transition">
+                        {item.count}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{ width: `${percent}%`, backgroundColor: color }}
+                    />
+                  </div>
+                </Link>
+              );
+            })}
             {byType.length === 0 && <p className="text-slate-400 text-sm">No data available</p>}
           </div>
         </div>

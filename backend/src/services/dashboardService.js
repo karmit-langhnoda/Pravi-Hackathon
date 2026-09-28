@@ -3,6 +3,7 @@ import { Request } from '../models/Request.js';
 import { MaintenanceRecord } from '../models/MaintenanceRecord.js';
 import { LifecycleEvent } from '../models/LifecycleEvent.js';
 import { buildAssetFilter } from '../helpers/assetHelpers.js';
+import { pool } from '../lib/pgClient.js';
 
 export const getSummary = async (user) => {
   const baseFilter = buildAssetFilter(user);
@@ -38,28 +39,20 @@ export const getByStatus = async (user) => {
 };
 
 export const getByType = async (user) => {
-  const baseFilter = buildAssetFilter(user);
-  return Asset.aggregate([
-    { $match: baseFilter },
-    {
-      $lookup: {
-        from: 'assettypes',
-        localField: 'assetType',
-        foreignField: '_id',
-        as: 'typeDoc',
-      },
-    },
-    { $unwind: '$typeDoc' },
-    {
-      $group: {
-        _id: '$assetType',
-        name: { $first: '$typeDoc.name' },
-        count: { $sum: 1 },
-      },
-    },
-    { $sort: { count: -1 } },
-    { $limit: 10 },
-  ]);
+  const res = await pool.query(`
+    SELECT 
+      t.id as "_id",
+      t.name as "name",
+      t.code as "code",
+      count(a.id)::int as "count"
+    FROM asset_types t
+    LEFT JOIN assets a ON (a.asset_type_id = t.id OR a.data->>'assetType' = t.id)
+    GROUP BY t.id, t.name, t.code
+    HAVING count(a.id) > 0
+    ORDER BY count DESC
+    LIMIT 10
+  `);
+  return res.rows;
 };
 
 export const getByLocation = async (user) => {
